@@ -82,7 +82,7 @@ else:
     print(f"Error al acceder a la página. Código de estado: {response.status_code}")
 ```
 
-Y obtenemos la tabla
+Y obtenemos el resumen de la tabla :
 | Plan      | Precio | Internet | App                      | Llamadas    | SMS        | Roaming               |
 | :-------- | :----- | :------- | :----------------------- | :---------- | :--------- | :-------------------- |
 | Power 99  | S/ 99  | 50 GB    | Facebook, Instagram Free | Ilimitadas  | Ilimitados | América, Europa       |
