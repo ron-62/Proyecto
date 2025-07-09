@@ -1,4 +1,20 @@
 Proyecto
+# 📱 Scraping de Planes Entel Perú
+
+Este proyecto hace scraping de los planes postpago de Entel Perú y extrae:
+- Nombre del plan
+- Precio
+- Datos de internet
+- Apps incluidas
+- Minutos de llamadas
+- SMS
+- Roaming
+
+## 📦 Librerías usadas
+
+```bash
+pip install requests beautifulsoup4 pandas
+
 
 Generamos por medio de formato .csv una tabla con relación precio -beneficios por cada plan 
 ```python
@@ -67,3 +83,9 @@ else:
 ```
 
 Y obtenemos la tabla
+| Plan      | Precio | Internet | App                      | Llamadas    | SMS        | Roaming               |
+| :-------- | :----- | :------- | :----------------------- | :---------- | :--------- | :-------------------- |
+| Power 99  | S/ 99  | 50 GB    | Facebook, Instagram Free | Ilimitadas  | Ilimitados | América, Europa       |
+| Simple 49 | S/ 49  | 15 GB    | Facebook Free            | 300 minutos | 100        | América               |
+| Full 149  | S/ 149 | 80 GB    | Apps ilimitadas          | Ilimitadas  | Ilimitados | América, Europa, Asia |
+| Promo 79  | S/ 79  | 30 GB    | WhatsApp, Facebook Free  | 500 minutos | 200        | Solo América          |
