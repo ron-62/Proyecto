@@ -64,7 +64,6 @@ if response.status_code == 200:
     print("Datos guardados en 'ofertas_entel_mejorado.csv'")
 else:
     print(f"Error al acceder a la página. Código de estado: {response.status_code}")
-'''
-
+```
 
 Y obtenemos la tabla
