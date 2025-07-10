@@ -201,4 +201,22 @@ def scrape_postpago():
 if __name__ == "__main__":
     scrape_postpago()
 
+
 ```
+Y obtenemos el resumen de la tabla :
+
+| plan            |   precio_inicial |   gb_inicial | apps_incluidas                                                           | categoria            |
+|:----------------|-----------------:|-------------:|:-------------------------------------------------------------------------|:---------------------|
+| Flash 29.90     |             29.9 |           50 | ['Instagram', 'WhatsApp', 'Spotify', 'Facebook']                         | Flash (postpago)     |
+| Flash 39.90     |             39.9 |           50 | ['Instagram', 'WhatsApp', 'Spotify', 'Facebook']                         | Flash (postpago)     |
+| Flash 49.90     |             49.9 |           70 | ['Instagram', 'WhatsApp', 'Spotify', 'Facebook']                         | Flash (postpago)     |
+| Flash 109.90    |             54.9 |          200 | ['Instagram', 'Facebook', 'Paramount+', 'WhatsApp', 'TikTok', 'Spotify'] | Flash (postpago)     |
+| 39.90 ilimitado |             39.9 |           80 | ['Spotify', 'TV360Bitel']                                                | Ilimitado (postpago) |
+| 49.90 ilimitado |             24.9 |           45 | ['Spotify', 'TikTok', 'TV360Bitel']                                      | Ilimitado (postpago) |
+| 55.90 ilimitado |             39.1 |           60 | ['Paramount+', 'Spotify', 'TikTok', 'TV360Bitel']                        | Ilimitado (postpago) |
+| 65.90 ilimitado |             46.1 |          100 | ['Paramount+', 'Spotify', 'TikTok', 'TV360Bitel']                        | Ilimitado (postpago) |
+| 69.90 ilimitado |             34.9 |          110 | ['Paramount+', 'Spotify', 'TikTok', 'TV360Bitel']                        | Ilimitado (postpago) |
+| 79.90 ilimitado |             39.9 |          125 | ['Paramount+', 'Spotify', 'TikTok', 'TV360Bitel']                        | Ilimitado (postpago) |
+| 5G              |            nan   |          nan |                                                                          | Ilimitado (postpago) |
+| 4G-LTE          |            nan   |          nan |                                                                          | Ilimitado (postpago) |
+| 3G              |            nan   |          nan |                                                                          | Ilimitado (postpago) |
