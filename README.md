@@ -30,6 +30,7 @@ headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
 }
 response = requests.get(url, headers=headers)
+
 # Verificar que la petición fue exitosa
 if response.status_code == 200:
     soup = BeautifulSoup(response.content, 'html.parser')
@@ -41,28 +42,47 @@ if response.status_code == 200:
     plan_boxes = soup.find_all('div', class_='box')
     
     for box in plan_boxes:
-        # Extraer el nombre del plan específicamente de la etiqueta <b> dentro de property_internet
-        plan_name_tag = box.find('div', class_='property property_internet').find('b') if box.find('div', class_='property property_internet') else None
-        plan_name = plan_name_tag.get_text(strip=True) if plan_name_tag else 'N/A'
+        # Extraer nombre del plan desde <b> dentro de property_internet
+        plan_name_tag = box.find('div', class_='property property_internet')
+        if plan_name_tag and plan_name_tag.find('b'):
+            plan_name = plan_name_tag.find('b').get_text(strip=True)
+        else:
+            plan_name = 'N/A'
         
-        # Extraer el precio
-        price = box.find('div', class_='price').get_text(strip=True) if box.find('div', class_='price') else 'N/A'
+        # Extraer precio
+        price_tag = box.find('div', class_='price')
+        price = price_tag.get_text(strip=True) if price_tag else 'N/A'
         
-        # Extraer características específicas
-        internet = box.find('div', class_='property property_internet').get_text(strip=True) if box.find('div', class_='property property_internet') else 'N/A'
-        app = box.find('div', class_='property property_app').get_text(strip=True, separator=' ') if box.find('div', class_='property property_app') else 'N/A'
-        llamadas = box.find('div', class_='property property_llamadas').get_text(strip=True) if box.find('div', class_='property property_llamadas') else 'N/A'
-        sms = box.find('div', class_='property property_sms').get_text(strip=True) if box.find('div', class_='property property_sms') else 'N/A'
-        roaming = box.find('div', class_='property property_roaming').get_text(strip=True) if box.find('div', class_='property property_roaming') else 'N/A')
-# Agregar los datos a la lista
+        # Extraer la información de internet desde el div.gb
+        gb_div = box.find('div', class_='gb')
+        if gb_div:
+            strong_text = gb_div.find('strong').get_text(strip=True) if gb_div.find('strong') else ''
+            span_text = gb_div.find('span').get_text(strip=True) if gb_div.find('span') else ''
+            internet = f"{strong_text} {span_text}".strip()
+        else:
+            internet = 'N/A'
+        
+        # Extraer otras características
+        app = box.find('div', class_='property property_app')
+        llamadas = box.find('div', class_='property property_llamadas')
+        sms = box.find('div', class_='property property_sms')
+        roaming = box.find('div', class_='property property_roaming')
+        
+        # Obtener los textos
+        app_text = app.get_text(strip=True, separator=' ') if app else 'N/A'
+        llamadas_text = llamadas.get_text(strip=True) if llamadas else 'N/A'
+        sms_text = sms.get_text(strip=True) if sms else 'N/A'
+        roaming_text = roaming.get_text(strip=True) if roaming else 'N/A'
+        
+        # Agregar los datos a la lista
         data.append({
             'Plan': plan_name,
             'Precio': price,
             'Internet': internet,
-            'App': app,
-            'Llamadas': llamadas,
-            'SMS': sms,
-            'Roaming': roaming
+            'App': app_text,
+            'Llamadas': llamadas_text,
+            'SMS': sms_text,
+            'Roaming': roaming_text
         })
     
     # Crear DataFrame
