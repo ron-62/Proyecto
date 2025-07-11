@@ -87,7 +87,7 @@ Y obtenemos el resumen de la tabla :
 
 
 
-Proyecto
+
 # 📱 Scraping de Planes Bitel Perú
 
 Este proyecto hace scraping de los planes postpago de Bitel Perú y extrae:
