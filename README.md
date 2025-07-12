@@ -1,5 +1,5 @@
 Proyecto
-# 📱 Scraping de Planes Entel Perú
+# 📱Web scraping de Planes Entel Perú
 
 Este proyecto hace scraping de los planes postpago de Entel Perú y extrae:
 - Nombre del plan
