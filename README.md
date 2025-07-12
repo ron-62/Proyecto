@@ -1,4 +1,35 @@
-Proyecto
+<div align="center">
+
+##  Proyecto de Lenguaje de Programación 2
+
+##  Web Scraping de Planes Postpago Perú
+<img width="500" height="8000" alt="image" src="https://github.com/user-attachments/assets/9d05e835-b0ce-4667-816b-5ab488106015" />
+
+
+</div>
+
+# Integrantes:
+
+|Nombres y Apellidos      | Codigo     |
+|:------------------------|:-----------|
+| Nicole Alva Aquino      |  20221388    |
+|   Alejandra Arroyo            |    20211805     |
+|  Alonso coronado de la Vega  |     20221395      |
+
+
+### 📚 Curso: Lenguaje de Programación 2  
+### 👩‍💻 Docente: Ana Vargas  
+### 📅 Ciclo: 2025-I
+
+
+# 📖 Introducción
+El avance de la tecnología y la digitalización de los servicios han hecho posible acceder a información en línea de manera rápida y automatizada. En este contexto, el web scraping se presenta como una herramienta fundamental para la recolección eficiente de datos desde páginas web. Este proyecto tiene como finalidad aplicar conocimientos técnicos de lenguaje de programación Python y herramientas complementarias como Selenium, BeautifulSoup, pandas y Dash, para obtener, procesar y visualizar información relevante de los planes postpago ofrecidos por operadoras móviles en Perú, como Entel y Bitel.
+
+El presente trabajo se enmarca dentro del curso Lenguaje de Programación 2, cuyo objetivo es fortalecer las competencias técnicas en el uso de plataformas y entornos de desarrollo para la automatización de procesos, análisis de datos y creación de dashboards interactivos. Mediante este proyecto, se busca recolectar datos sobre las tarifas y beneficios de los planes móviles, estructurarlos en archivos CSV y JSON, y presentarlos de forma clara y dinámica a través de dashboards, facilitando su análisis y comparación.
+
+# 🎯 Objetivo General
+Desarrollar un sistema de scraping y visualización de datos de planes postpago de operadoras móviles en Perú, aplicando herramientas de programación en Python para automatizar la recolección, almacenamiento y representación de información, permitiendo comparar tarifas y beneficios mediante dashboards interactivos.
+
 # 📱Web scraping de Planes Entel Perú
 
 Este proyecto hace scraping de los planes postpago de Entel Perú y extrae:
