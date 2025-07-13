@@ -153,7 +153,7 @@ Este proyecto hace scraping de los planes postpago de Bitel Perú y extrae:
 
 print("\n--- Instalación de Chrome y dependencias completada ---")
 ```
-Código Web Scrapping Bitel
+## Código Web Scrapping Bitel
 ```bash
 # --- PASO 1: INSTALAR LAS LIBRERÍAS NECESARIAS EN GOOGLE COLAB ---
 # ¡IMPORTANTE!: Ejecuta esta celda al inicio de tu notebook.
