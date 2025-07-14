@@ -876,6 +876,24 @@ if __name__ == "__main__":
     else:
         print("No se pudieron extraer los planes. Revisa si la página de Movistar ha cambiado.")
 ```
+| Plan                       | Precio/mes              | Internet  | Apps Ilimitadas    | Llamadas                         | SMS     |
+| -------------------------- | ----------------------- | --------- | ------------------ | -------------------------------- | ------- |
+| Plan Postpago 69.90        | S/69.90                 | Ilimitado | Internet Ilimitado | Ilimitadas Perú                  | 500 SMS |
+| Plan Postpago 39.90        | S/39.90                 | Ilimitado | Apps x 12 meses    | Ilimitadas Perú, 350 min USA/CAN | 500 SMS |
+| Plan Postpago 49.90        | S/49.90                 | Ilimitado | Apps x 12 meses    | Ilimitadas Perú, 400 min USA/CAN | 500 SMS |
+| Plan Postpago 59.90        | S/59.90                 | Ilimitado | Apps x 12 meses    | Ilimitadas Perú                  | 500 SMS |
+| Plan Postpago 79.90        | S/79.90                 | Ilimitado | Internet Ilimitado | Ilimitadas Perú                  | 500 SMS |
+| Plan Postpago 99.90        | S/99.90                 | Ilimitado | Internet Ilimitado | Ilimitadas Perú                  | 500 SMS |
+| Ahorra 50% 49.95           | S/49.95 (antes S/99.90) | 135 GB    | Internet Ilimitado | Ilimitadas Perú                  | 500 SMS |
+| Ahorra 50% 39.95           | S/39.95 (antes S/79.90) | 120 GB    | Internet Ilimitado | Ilimitadas Perú                  | 500 SMS |
+| Ahorra 50% 34.95           | S/34.95 (antes S/69.90) | 100 GB    | Internet Ilimitado | Ilimitadas Perú                  | 500 SMS |
+| Plan Postpago 59.90 (30GB) | S/59.90                 | 30 GB     | Apps x 12 meses    | Ilimitadas Perú                  | 500 SMS |
+| Plan Postpago 49.90 (30GB) | S/49.90                 | 30 GB     | Apps x 12 meses    | Ilimitadas Perú, 400 min USA/CAN | 500 SMS |
+| Plan Postpago 39.90 (30GB) | S/39.90                 | 30 GB     | Apps x 12 meses    | Ilimitadas Perú, 350 min USA/CAN | 500 SMS |
+| Ahorra 20% 55.92           | S/55.92 (antes S/69.90) | Ilimitado | Internet Ilimitado | Ilimitadas Perú, 350 min USA/CAN | 500 SMS |
+| Ahorra 20% 63.92           | S/63.92 (antes S/79.90) | Ilimitado | Internet Ilimitado | Ilimitadas Perú                  | 500 SMS |
+| Ahorra 20% 79.92           | S/79.92 (antes S/99.90) | Ilimitado | Internet Ilimitado | Ilimitadas Perú                  | 500 SMS |
+
 
 # 📱Web scraping de Planes Claro Perú
 Este proyecto hace scraping de los planes postpago de Claro Perú y extrae:
