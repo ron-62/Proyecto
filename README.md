@@ -521,3 +521,606 @@ Y obtenemos el resumen de la tabla :
 | 5G              |            nan   |          nan |                                                                          | Ilimitado (postpago) |
 | 4G-LTE          |            nan   |          nan |                                                                          | Ilimitado (postpago) |
 | 3G              |            nan   |          nan |                                                                          | Ilimitado (postpago) |
+
+# 📱Web scraping de Planes Movistar Perú
+Este proyecto hace scraping de los planes postpago de Movistar Perú y extrae:
+- Nombre del plan
+- Precio
+- Datos de internet
+- Apps incluidas
+- Minutos de llamadas
+- SMS
+
+## 📦 Dependencias
+```bash
+# Instalar Selenium, BeautifulSoup, Pandas y Webdriver Manager
+!pip install selenium beautifulsoup4 pandas webdriver-manager
+
+# --- INSTALACIÓN DE GOOGLE CHROME EN COLAB ---
+# 1. Descargar la clave GPG de Google Chrome
+!wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-chrome-archive-keyring.gpg
+
+# 2. Añadir el repositorio de Google Chrome a las fuentes de apt
+!echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome-archive-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+
+# 3. Actualizar los listados de paquetes apt para incluir el nuevo repositorio
+!sudo apt-get update
+
+# 4. Instalar Google Chrome estable
+!sudo apt-get install -y google-chrome-stable
+
+# Opcional: Verificar la versión de Chrome instalada
+!google-chrome --version
+
+print("\n--- Instalación de Chrome y dependencias completada ---")
+```
+## Código Web Scrapping Movistar
+```bash
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from bs4 import BeautifulSoup
+import time
+import pandas as pd
+import re
+from webdriver_manager.chrome import ChromeDriverManager
+
+# Importar para mostrar HTML en Colab
+from IPython.display import display, HTML
+
+def extraer_planes_movistar_colab():
+    url = "https://www.movistar.com.pe/movil/postpago/planes-postpago"
+    planes_data = []
+
+    # --- CONFIGURACIÓN DE SELENIUM PARA COLAB ---
+    options = webdriver.ChromeOptions()
+    options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev_shm_usage')
+    options.add_argument('--window-size=1920,1080')
+    options.add_argument('--log-level=3')
+    options.add_experimental_option('excludeSwitches', ['enable-logging'])
+
+    driver = None
+
+    try:
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=options)
+        driver.get(url)
+
+        # --- ESPERAR A QUE EL CONTENIDO DINÁMICO CARGUE ---
+        wait = WebDriverWait(driver, 30)
+        try:
+            wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'p-plan__slide__soles')))
+        except:
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            time.sleep(5)
+            wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'p-plan__slide__soles')))
+
+        time.sleep(5)
+
+        page_source = driver.page_source
+        soup = BeautifulSoup(page_source, 'html.parser')
+
+        plan_elements = soup.find_all('div', class_='p-plan__slide__shadow')
+
+        if not plan_elements:
+            print("ERROR: No se encontraron elementos con la clase 'p-plan__slide__shadow'.")
+            print("Esto podría indicar que la clase ha cambiado nuevamente o el contenido no se cargó como se esperaba.")
+            return []
+
+        for i, plan_element in enumerate(plan_elements):
+            nombre_plan = 'N/A'
+            precio = 'N/A'
+            gigas = 'N/A'
+            apps_ilimitadas_text = 'N/A'
+            otros_beneficios = {}
+            llamadas_encontradas = None
+            sms_encontrados = None
+
+            # 1. Extraer Precio
+            precio_tag = plan_element.find('span', class_='p-plan__slide__soles')
+            if precio_tag:
+                precio = precio_tag.get_text(strip=True)
+
+            # 2. Extraer Nombre del Plan (Limpieza Mejorada)
+            head_tag = plan_element.find('div', class_='p-plan__slide__head')
+            if head_tag:
+                name_tag = head_tag.find(['h3', 'h4', 'span', 'p'], class_=lambda x: x and ('p-plan__slide__name' in x or 'title' in x or 'plan-name' in x))
+                if name_tag:
+                    nombre_plan = name_tag.get_text(strip=True)
+                else:
+                    nombre_plan = ' '.join(head_tag.get_text(separator=' ', strip=True).split())
+
+                nombre_plan = re.sub(r'Plan Postpago\s*', '', nombre_plan, flags=re.IGNORECASE)
+                nombre_plan = re.sub(r'S/\s*\d+\.\d+', '', nombre_plan, flags=re.IGNORECASE)
+                nombre_plan = re.sub(r'al mes', '', nombre_plan, flags=re.IGNORECASE)
+                nombre_plan = re.sub(r'x \d+ meses', '', nombre_plan, flags=re.IGNORECASE)
+                nombre_plan = re.sub(r'Precio regular:.*?(Ahorra \d+%)?', '', nombre_plan, flags=re.IGNORECASE)
+                nombre_plan = re.sub(r'Bono \d+ GB', '', nombre_plan, flags=re.IGNORECASE)
+                nombre_plan = re.sub(r'Exclusivo online', '', nombre_plan, flags=re.IGNORECASE)
+                nombre_plan = re.sub(r'\*', '', nombre_plan).strip()
+                nombre_plan = re.sub(r'\s{2,}', ' ', nombre_plan).strip()
+
+                if not nombre_plan:
+                    nombre_plan = f"Plan Postpago {precio}" if precio != 'N/A' else 'Plan Postpago Desconocido'
+
+
+            # 3. Extraer Gigas / Datos
+            gigas_cantidad_tag = plan_element.find('span', class_='p-plan__slide__cantidad')
+            if gigas_cantidad_tag:
+                extracted_gigas = gigas_cantidad_tag.get_text(strip=True).replace('\n', ' ').strip()
+                if "GB" in extracted_gigas.upper() or re.match(r'^\d+(\.\d+)?\s*GB$', extracted_gigas, re.IGNORECASE):
+                    gigas = extracted_gigas
+                elif "Bono" in extracted_gigas and "GB" in extracted_gigas:
+                    gigas = extracted_gigas
+
+            if gigas == 'N/A':
+                ilimitado_tag = plan_element.find(['span', 'div', 'h3', 'p'], class_=lambda x: x and ('p-plan__slide__gigas' in x or 'gigas-text' in x or 'data-info' in x))
+                if ilimitado_tag and ("ilimitado" in ilimitado_tag.get_text().lower() or "sin límites" in ilimitado_tag.get_text().lower()):
+                    gigas = "Ilimitados"
+                else:
+                    text_content_lower = plan_element.get_text(separator=' ', strip=True).lower()
+                    if "ilimitado" in text_content_lower and ("datos" in text_content_lower or "gigas" in text_content_lower):
+                        gigas = "Ilimitados"
+                    else:
+                        match_gb = re.search(r'(\d+)\s*gb', text_content_lower)
+                        if match_gb:
+                            gigas = f"{match_gb.group(1)} GB"
+                        else:
+                            match_bono_gb = re.search(r'(bono\s*\d+\s*gb\s*x\s*\d+\s*meses)', text_content_lower)
+                            if match_bono_gb:
+                                gigas = match_bono_gb.group(1).replace('x', 'x ')
+
+            # 4. Extraer Apps Ilimitadas
+            apps_ttl_tag = plan_element.find('p', class_='p-plan__slide__apps__ttl')
+            if apps_ttl_tag:
+                apps_ilimitadas_text = apps_ttl_tag.get_text(strip=True)
+                apps_ilimitadas_text = re.sub(r'\s*\n\s*', ' ', apps_ilimitadas_text).strip()
+            else:
+                apps_ilimitadas_list_temp = []
+                apps_container = plan_element.find('div', class_='p-plan__slide__apps')
+                if apps_container:
+                    app_elements = apps_container.find_all(['img', 'span', 'i', 'p'], class_=lambda x: x and ('app-icon' in x or 'unlimited-app-icon' in x or 'logo-app' in x or 'app-name' in x))
+                    for app_el in app_elements:
+                        app_name = app_el.get('alt') or app_el.get('title') or app_el.get_text(strip=True)
+                        if app_name and app_name.strip():
+                            apps_ilimitadas_list_temp.append(re.sub(r'\s*\n\s*', ' ', app_name).strip())
+
+                if not apps_ilimitadas_list_temp:
+                    text_content_full = plan_element.get_text(separator=' ', strip=True)
+                    match_apps_text = re.search(r'(?:Apps|Redes Sociales)\s+Ilimitadas(?::\s*(.*?))?(?=[.\n]|$)', text_content_full, re.IGNORECASE | re.DOTALL)
+                    if match_apps_text:
+                        if match_apps_text.group(1):
+                            apps_ilimitadas_list_temp.extend([re.sub(r'\s*\n\s*', ' ', app.strip()).strip() for app in match_apps_text.group(1).split(',') if app.strip()])
+                        else:
+                            apps_ilimitadas_list_temp.append(re.sub(r'\s*\n\s*', ' ', match_apps_text.group(0).replace(":", "").strip()).strip())
+
+                    keywords = ["WhatsApp", "Facebook", "Instagram", "TikTok", "Spotify", "Netflix", "Youtube", "Waze", "Twitter"]
+                    for keyword in keywords:
+                        if f"{keyword} Ilimitado" in text_content_full or f"Acceso ilimitado a {keyword}" in text_content_full:
+                            if keyword.lower() not in [a.lower() for a in apps_ilimitadas_list_temp]:
+                                apps_ilimitadas_list_temp.append(keyword)
+
+                if apps_ilimitadas_list_temp:
+                    apps_ilimitadas_text = ", ".join(sorted(list(set(apps_ilimitadas_list_temp))))
+
+            # 5. Extraer Otros Beneficios (Minutos/Llamadas, SMS y otros) - LÓGICA MEJORADA Y MÁS GRANULAR
+            all_benefit_texts_raw = []
+
+            # Priorizar la clase específica que mostraste para llamadas/SMS
+            benefit_text_tags_specific = plan_element.find_all('p', class_='stefa-parrilla_blanco--body-texto')
+            for tag in benefit_text_tags_specific:
+                all_benefit_texts_raw.append(tag.get_text(strip=True))
+
+            # Buscar en el contenedor general de detalles por si hay más beneficios
+            details_container = plan_element.find('div', class_='p-plan__slide__details')
+            if details_container:
+                general_benefit_tags = details_container.find_all(['li', 'p', 'span', 'div'], class_=lambda x: x and ('benefit-item' in x or 'feature-row' in x or 'text-benefit' in x or 'item-detail' in x or 'body-text' in x or 'plan-detail' in x))
+                for tag in general_benefit_tags:
+                    all_benefit_texts_raw.append(tag.get_text(strip=True))
+
+            # También considerar el texto completo del plan si no se encontró nada más específico
+            full_plan_text = plan_element.get_text(separator=' ', strip=True)
+            all_benefit_texts_raw.append(full_plan_text)
+
+            processed_texts = set()
+
+            for raw_text in all_benefit_texts_raw:
+                cleaned_text = re.sub(r'\s*\n\s*', ' ', raw_text).strip()
+                if not cleaned_text or cleaned_text in processed_texts:
+                    continue
+                processed_texts.add(cleaned_text)
+
+                text_lower = cleaned_text.lower()
+
+                # --- Extracción granular de Minutos/Llamadas ---
+                if llamadas_encontradas is None: # Solo si no se ha encontrado una frase específica de llamadas
+                    # Patrones para llamadas ilimitadas o con minutos específicos
+                    match_calls = re.search(r'(llamadas ilimitadas Perú(?:,)?(?: \d+ minutos para Usa y Canadá)?|minutos ilimitados Perú(?:,)?(?: \d+ para Usa y Canadá)?|llamadas ilimitadas a todo destino nacional|minutos ilimitados a todo destino nacional)', text_lower, re.IGNORECASE)
+                    if match_calls:
+                        llamadas_encontradas = match_calls.group(0).replace('perú,', 'Perú,').replace('usa y canadá', 'Usa y Canadá').replace('minutos para', 'minutos para ').strip()
+                    elif 'llamadas ilimitadas' in text_lower: # Captura general si no hay patrón específico
+                           llamadas_encontradas = 'Llamadas ilimitadas'
+                    elif re.search(r'(\d+)\s*minutos\s*para\s*(usa|canadá|internacionales)', text_lower, re.IGNORECASE):
+                        llamadas_encontradas = "Minutos internacionales (especificar cantidad)" # Placeholder para refinar si es necesario
+
+                # --- Extracción granular de SMS ---
+                if sms_encontrados is None: # Solo si no se ha encontrado una frase específica de SMS
+                    # Patrones para SMS
+                    match_sms = re.search(r'(\d+)\s*sms|(sms ilimitados)', text_lower, re.IGNORECASE)
+                    if match_sms:
+                        if match_sms.group(1): # Si encontró un número de SMS
+                            sms_encontrados = f"{match_sms.group(1)} SMS"
+                        else: # Si encontró "SMS ilimitados"
+                            sms_encontrados = "SMS ilimitados"
+
+                # Otros beneficios generales que no sean llamadas ni SMS y que tengan contenido significativo
+                if len(cleaned_text) > 10 and \
+                   not (llamadas_encontradas and llamadas_encontradas in cleaned_text) and \
+                   not (sms_encontrados and sms_encontrados in cleaned_text) and \
+                   "gb" not in text_lower and "gigas" not in text_lower and \
+                   "apps" not in text_lower and "precio" not in text_lower and \
+                   "plan" not in text_lower and "bono" not in text_lower:
+
+                    is_duplicate_or_classified = False
+                    for existing_benefit_key, existing_benefit_value in otros_beneficios.items():
+                        if cleaned_text == existing_benefit_value or cleaned_text in existing_benefit_value or existing_benefit_value in cleaned_text:
+                            is_duplicate_or_classified = True
+                            break
+
+                    if not is_duplicate_or_classified:
+                        otros_beneficios[f'Otro Beneficio {len([k for k in otros_beneficios if k.startswith("Otro Beneficio")]) + 1}'] = cleaned_text
+
+            # Post-procesamiento para apps_ilimitadas_text que contiene información de llamadas
+            if "llamadasilimitadas" in apps_ilimitadas_text.lower() and llamadas_encontradas is None:
+                llamadas_encontradas = "Llamadas ilimitadas"
+                apps_ilimitadas_text = re.sub(r'Internet \+ llamadasilimitadas', 'Internet', apps_ilimitadas_text, flags=re.IGNORECASE).strip()
+                if apps_ilimitadas_text == 'Internet' or not apps_ilimitadas_text:
+                    apps_ilimitadas_text = 'N/A'
+
+            # Asignar los valores finales a otros_beneficios
+            if llamadas_encontradas:
+                otros_beneficios['Minutos/Llamadas'] = llamadas_encontradas
+            if sms_encontrados:
+                otros_beneficios['SMS'] = sms_encontrados
+
+
+            # --- AGREGAR LOS DATOS DEL PLAN A LA LISTA ---
+            planes_data.append({
+                'Nombre del Plan': nombre_plan,
+                'Precio (S/)': precio,
+                'Gigas': gigas,
+                'Apps Ilimitadas': apps_ilimitadas_text,
+                **otros_beneficios
+            })
+
+    except Exception as e:
+        # LÍNEA CORREGIDA
+        print(f"Ocurrió un error en la ejecución: {e}")
+    finally:
+        if driver:
+            driver.quit()
+
+    return planes_data
+
+if __name__ == "__main__":
+    planes = extraer_planes_movistar_colab()
+    if planes:
+        df = pd.DataFrame(planes)
+        df.to_csv("planes_movistar_postpago.csv", index=False)
+        print("Datos guardados en planes_movistar_postpago.csv (puedes descargarlo desde el panel de archivos).")
+
+        # --- GENERAR SALIDA HTML ---
+        html_output = """
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Planes Postpago Movistar Perú</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
+                h1 { color: #007bff; text-align: center; }
+                table { width: 100%; border-collapse: collapse; margin-top: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); background-color: #fff; }
+                th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #ddd; }
+                th { background-color: #007bff; color: white; text-transform: uppercase; font-size: 0.9em; }
+                tr:nth-child(even) { background-color: #f9f9f9; }
+                tr:hover { background-color: #f1f1f1; }
+                .note { margin-top: 30px; font-size: 0.9em; color: #666; text-align: center; }
+            </style>
+        </head>
+        <body>
+            <h1>Planes Postpago Movistar Perú</h1>
+            <table>
+                <thead>
+                    <tr>
+        """
+
+        # Generar los encabezados de la tabla a partir de las columnas del DataFrame
+        for col in df.columns:
+            html_output += f"<th>{col}</th>\n"
+
+        html_output += """
+                    </tr>
+                </thead>
+                <tbody>
+        """
+
+        # Generar las filas de la tabla
+        for index, row in df.iterrows():
+            html_output += "<tr>\n"
+            for col in df.columns:
+                # Asegúrate de que los valores sean strings para evitar errores en HTML
+                html_output += f"<td>{str(row[col])}</td>\n"
+            html_output += "</tr>\n"
+
+        html_output += """
+                </tbody>
+            </table>
+            <p class="note">Datos extraídos de la web de Movistar Perú.</p>
+        </body>
+        </html>
+        """
+
+        # Mostrar el HTML directamente en la salida de Colab
+        display(HTML(html_output))
+
+        # Guarda el archivo HTML también, por si lo necesitas descargar
+        with open("planes_movistar_postpago.html", "w", encoding="utf-8") as f:
+            f.write(html_output)
+        print("El reporte HTML también se guardó en 'planes_movistar_postpago.html' (puedes descargarlo).")
+
+    else:
+        print("No se pudieron extraer los planes. Revisa si la página de Movistar ha cambiado.")
+```
+
+# 📱Web scraping de Planes Claro Perú
+Este proyecto hace scraping de los planes postpago de Claro Perú y extrae:
+- Nombre del plan
+- Precio
+- Datos de internet
+- Apps incluidas
+- Minutos de llamadas
+- SMS
+
+## 📦 Dependencias
+```bash
+# Instalar Selenium, BeautifulSoup, Pandas y Webdriver Manager
+!pip install selenium beautifulsoup4 pandas webdriver-manager
+
+# --- INSTALACIÓN DE GOOGLE CHROME EN COLAB ---
+# 1. Descargar la clave GPG de Google Chrome
+!wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-chrome-archive-keyring.gpg
+
+# 2. Añadir el repositorio de Google Chrome a las fuentes de apt
+!echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome-archive-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+
+# 3. Actualizar los listados de paquetes apt para incluir el nuevo repositorio
+!sudo apt-get update
+
+# 4. Instalar Google Chrome estable
+!sudo apt-get install -y google-chrome-stable
+
+# Opcional: Verificar la versión de Chrome instalada
+!google-chrome --version
+
+print("\n--- Instalación de Chrome y dependencias completada ---")
+```
+## Código Web Scrapping Claro
+```bash
+# --- PASO 1: INSTALAR LAS LIBRERÍAS NECESARIAS EN GOOGLE COLAB ---
+# ¡IMPORTANTE!: Ejecuta esta celda al inicio de tu notebook.
+# Esto intentará suprimir los mensajes de instalación.
+!pip install selenium webdriver-manager > /dev/null 2>&1
+
+# --- PASO 2: IMPORTAR LAS LIBRERÍAS ---
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from bs4 import BeautifulSoup
+import time
+import pandas as pd
+from webdriver_manager.chrome import ChromeDriverManager
+
+# Importar para mostrar HTML en Colab
+from IPython.display import display, HTML
+
+def extract_claro_plans_colab():
+    """
+    Extracts post-paid plan information from Claro Peru's website.
+    It uses Selenium for dynamic content and BeautifulSoup for HTML parsing.
+    Returns a list of dictionaries, with plans sorted by price and without duplicates.
+    """
+    url = "https://www.claro.com.pe/personas/movil/postpago/"
+    plans_data = []
+    processed_plans = set()  # To store (name, price) tuples to prevent duplicates
+
+    # --- SELENIUM CONFIGURATION FOR COLAB ---
+    options = webdriver.ChromeOptions()
+    options.add_argument('--headless')           # Runs Chrome without a visible window
+    options.add_argument('--no-sandbox')         # Necessary for Linux environments like Colab
+    options.add_argument('--disable-dev-shm-usage') # Prevents memory issues in some environments
+    options.add_argument('--window-size=1920,1080') # Common resolution for better element loading
+    options.add_argument('--log-level=3')        # Suppresses most Chrome browser log messages
+
+    driver = None
+
+    try:
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=options)
+        driver.get(url)
+
+        # --- WAIT FOR DYNAMIC CONTENT TO LOAD ---
+        wait = WebDriverWait(driver, 20)
+        wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'cA1PEBodyCardWrap')))
+        time.sleep(5) # Give extra time for full content rendering
+
+        page_source = driver.page_source
+        soup = BeautifulSoup(page_source, 'html.parser')
+
+        plan_elements = soup.find_all('div', class_='cA1PEBodyCardWrap')
+
+        if not plan_elements:
+            # This is the only error message that will appear if no plan elements are found.
+            print("ERROR: No plan elements found on the page. The HTML structure might have changed.")
+            return []
+
+        for plan_element in plan_elements:
+            name = plan_element.get('data-badge', 'N/A')
+            price_str = plan_element.get('data-price', 'N/A')
+            try:
+                price = float(price_str)
+            except ValueError:
+                price = 'N/A'
+
+            plan_key = (name, price)
+            if plan_key in processed_plans:
+                continue
+            processed_plans.add(plan_key)
+
+            gigas = 'N/A'
+            unlimited_apps = 'N/A'
+            calls_sms = 'N/A'
+
+            # --- GIGAS EXTRACTION ---
+            gigas_tag = plan_element.find('span', class_='number')
+            if gigas_tag:
+                gigas_text = gigas_tag.get_text(strip=True)
+                if gigas_text.upper().endswith('GB'):
+                    gigas = gigas_text
+                else:
+                    gigas = gigas_text + ' GB'
+
+            # --- SPECIFIC HANDLING FOR "MAX ILIMITADO" PLANS ---
+            is_max_ilimitado_promo = False
+            promo_div = plan_element.find('div', class_='cardPePromo')
+            if promo_div:
+                promo_text_span = promo_div.find('span', string=lambda text: text and 'Gigas, Minutos y SMS' in text)
+                if promo_text_span:
+                    is_max_ilimitado_promo = True
+                    calls_sms = "Ilimitadas"
+                    unlimited_apps = "Incluidas en Todo Ilimitado"
+
+            # --- GENERAL EXTRACTION (if not a specific "Max Ilimitado" promo plan) ---
+            if not is_max_ilimitado_promo:
+                apps_list = []
+                app_icon_tags = plan_element.find_all('i', class_=lambda x: x and 'cIco-rs-' in x)
+                for icon_tag in app_icon_tags:
+                    for cls in icon_tag.get('class', []):
+                        if 'cIco-rs-' in cls:
+                            app_name = cls.replace('cIco-rs-', '')
+                            apps_list.append(app_name.capitalize())
+                unlimited_apps = ", ".join(apps_list) if apps_list else 'N/A'
+
+                span_element_with_text = plan_element.find('span', string=lambda text: text and 'Llamadas y SMS' in text.strip())
+                if span_element_with_text:
+                    dt_parent = span_element_with_text.find_parent('dt')
+                    if dt_parent:
+                        dd_element = dt_parent.find_next_sibling('dd')
+                        if dd_element:
+                            calls_sms = dd_element.get_text(strip=True)
+
+            plans_data.append({
+                'Nombre del Plan': name,
+                'Precio (S/)': price,
+                'Gigas': gigas,
+                'Apps Ilimitadas': unlimited_apps,
+                'Llamadas y SMS': calls_sms
+            })
+
+    except Exception as e:
+        # This is the only place a critical error message will be printed.
+        print(f"An unexpected error occurred during extraction: {e}")
+        return []
+    finally:
+        if driver:
+            driver.quit()
+
+    sorted_plans = sorted(plans_data, key=lambda x: x['Precio (S/)'] if isinstance(x['Precio (S/)'], (int, float)) else float('inf'))
+    return sorted_plans
+
+if __name__ == "__main__":
+    plans = extract_claro_plans_colab()
+
+    if plans:
+        df = pd.DataFrame(plans)
+
+        # Custom CSS for the HTML table
+        html_style = """
+        <style>
+            body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
+            h1 { color: #E4002B; text-align: center; margin-bottom: 20px; } /* Claro red */
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* More pronounced shadow */
+                background-color: #fff;
+                border-radius: 8px; /* Rounded corners for the table */
+                overflow: hidden; /* Ensures rounded corners apply to content */
+            }
+            th, td {
+                padding: 15px 20px; /* More padding */
+                text-align: left;
+                border-bottom: 1px solid #eee; /* Lighter border */
+            }
+            th {
+                background-color: #E4002B; /* Claro red for headers */
+                color: white;
+                text-transform: uppercase;
+                font-size: 0.95em;
+                letter-spacing: 0.5px;
+            }
+            tr:nth-child(even) {
+                background-color: #f8f8f8; /* Slightly different shade for even rows */
+            }
+            tr:hover {
+                background-color: #f0f0f0; /* Subtle hover effect */
+            }
+            /* Style for the header line */
+            .header-line {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                font-size: 1.2em;
+                font-weight: bold;
+                color: #555;
+                text-align: center;
+                margin-bottom: 25px;
+                padding-bottom: 10px;
+                border-bottom: 2px solid #ddd;
+            }
+        </style>
+        """
+
+        # Generate the HTML table from the DataFrame
+        # Using escape=False to allow HTML entities if any, but generally good for plain text
+        html_table = df.to_html(index=False, escape=False, classes='claro-plans-table')
+
+        # Combine all parts into a full HTML document
+        full_html_output = f"""
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Planes y Beneficios Claro Perú</title>
+            {html_style}
+        </head>
+        <body>
+            <div class="header-line">--- Planes y Beneficios (ordenados por precio, sin duplicados) ---</div>
+            {html_table}
+        </body>
+        </html>
+        """
+
+        # Display the HTML directly in the Colab output cell
+        display(HTML(full_html_output))
+    else:
+        # This message will only appear if the extraction function returns an empty list
+        # (meaning an error occurred and was printed by the function itself).
+        pass # No additional print here to keep output clean if error already printed
+```
