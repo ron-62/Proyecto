@@ -1142,3 +1142,17 @@ if __name__ == "__main__":
         # (meaning an error occurred and was printed by the function itself).
         pass # No additional print here to keep output clean if error already printed
 ```
+| Plan                 | Precio/mes | Internet en Alta Velocidad | Apps Ilimitadas                                   | Llamadas y SMS |
+| -------------------- | ---------- | -------------------------- | ------------------------------------------------- | -------------- |
+| Max 29.90            | S/29.90    | 10 GB                      | Facebook, Instagram, Threads, WhatsApp            | Ilimitadas     |
+| Max 39.90            | S/39.90    | 25 GB                      | Facebook, Instagram, Threads, WhatsApp            | Ilimitadas     |
+| Max 49.90            | S/49.90    | 45 GB                      | Facebook, Instagram, Messenger, Threads, WhatsApp | Ilimitadas     |
+| Max 55.90            | S/55.90    | 75 GB                      | Facebook, Instagram, Messenger, Threads, WhatsApp | Ilimitadas     |
+| Max Ilimitado 69.90  | S/69.90    | 110 GB                     | Incluidas en Todo Ilimitado                       | Ilimitadas     |
+| Max Ilimitado 79.90  | S/79.90    | 125 GB                     | Incluidas en Todo Ilimitado                       | Ilimitadas     |
+| Max Ilimitado 95.90  | S/95.90    | 135 GB                     | Incluidas en Todo Ilimitado                       | Ilimitadas     |
+| Max Ilimitado 109.90 | S/109.90   | 160 GB                     | Incluidas en Todo Ilimitado                       | Ilimitadas     |
+| Max Ilimitado 159.90 | S/159.90   | 175 GB                     | Incluidas en Todo Ilimitado                       | Ilimitadas     |
+| Max Ilimitado 189.90 | S/189.90   | 185 GB                     | Incluidas en Todo Ilimitado                       | Ilimitadas     |
+| Max Ilimitado 289.90 | S/289.90   | 200 GB                     | Incluidas en Todo Ilimitado                       | Ilimitadas     |
+
