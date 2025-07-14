@@ -1163,5 +1163,5 @@ Y obtenemos el resumen de la tabla :
 ¡Agradecemos a todos los que han contribuido a este proyecto!
 
 * [ron-62](https://github.com/ron-62) (Alonso Coronado de la Vega)
-* [](https://github.com/usuario2) (Nicole Alva Aquino)
+* [nalva19](https://github.com/nalva19) (Nicole Alva Aquino)
 * [@usuario3](https://github.com/usuario3) (Alejandra Arroyo)
