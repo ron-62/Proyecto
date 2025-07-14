@@ -1155,3 +1155,13 @@ Y obtenemos el resumen de la tabla :
 | Max Ilimitado 189.90 | S/189.90   | 185 GB                     | Incluidas en Todo Ilimitado                       | Ilimitadas     |
 | Max Ilimitado 289.90 | S/289.90   | 200 GB                     | Incluidas en Todo Ilimitado                       | Ilimitadas     |
 
+
+---
+
+## Colaboradores
+
+¡Agradecemos a todos los que han contribuido a este proyecto!
+
+* [ron-62](https://github.com/ron-62) (Alonso Coronado de la Vega)
+* [@usuario2](https://github.com/usuario2) (Nombre Real 2)
+* [@usuario3](https://github.com/usuario3) (Nombre Real 3)
