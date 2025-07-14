@@ -161,6 +161,7 @@ print("\n--- Instalación de Chrome y dependencias completada ---")
 !pip install selenium webdriver-manager > /dev/null 2>&1
 
 # --- PASO 2: IMPORTAR LAS LIBRERÍAS ---
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -506,21 +507,16 @@ if __name__ == "__main__":
 ```
 Y obtenemos el resumen de la tabla :
 
-| plan            |   precio_inicial |   gb_inicial | apps_incluidas                                                           | categoria            |
-|:----------------|-----------------:|-------------:|:-------------------------------------------------------------------------|:---------------------|
-| Flash 29.90     |             29.9 |           50 | ['Instagram', 'WhatsApp', 'Spotify', 'Facebook']                         | Flash (postpago)     |
-| Flash 39.90     |             39.9 |           50 | ['Instagram', 'WhatsApp', 'Spotify', 'Facebook']                         | Flash (postpago)     |
-| Flash 49.90     |             49.9 |           70 | ['Instagram', 'WhatsApp', 'Spotify', 'Facebook']                         | Flash (postpago)     |
-| Flash 109.90    |             54.9 |          200 | ['Instagram', 'Facebook', 'Paramount+', 'WhatsApp', 'TikTok', 'Spotify'] | Flash (postpago)     |
-| 39.90 ilimitado |             39.9 |           80 | ['Spotify', 'TV360Bitel']                                                | Ilimitado (postpago) |
-| 49.90 ilimitado |             24.9 |           45 | ['Spotify', 'TikTok', 'TV360Bitel']                                      | Ilimitado (postpago) |
-| 55.90 ilimitado |             39.1 |           60 | ['Paramount+', 'Spotify', 'TikTok', 'TV360Bitel']                        | Ilimitado (postpago) |
-| 65.90 ilimitado |             46.1 |          100 | ['Paramount+', 'Spotify', 'TikTok', 'TV360Bitel']                        | Ilimitado (postpago) |
-| 69.90 ilimitado |             34.9 |          110 | ['Paramount+', 'Spotify', 'TikTok', 'TV360Bitel']                        | Ilimitado (postpago) |
-| 79.90 ilimitado |             39.9 |          125 | ['Paramount+', 'Spotify', 'TikTok', 'TV360Bitel']                        | Ilimitado (postpago) |
-| 5G              |            nan   |          nan |                                                                          | Ilimitado (postpago) |
-| 4G-LTE          |            nan   |          nan |                                                                          | Ilimitado (postpago) |
-| 3G              |            nan   |          nan |                                                                          | Ilimitado (postpago) |
+| Plan            | Precio/mes | Internet en Alta Velocidad | Apps Ilimitadas                                                            | Llamadas y SMS |
+| --------------- | ---------- | -------------------------- | -------------------------------------------------------------------------- | -------------- |
+| Ilimitado 27.90 | S/27.90    | 75 GB                      | Facebook, Instagram, WhatsApp, Paramount+, Spotify, TV360 *(12 meses)*     | Incluidas      |
+| Ilimitado 34.90 | S/34.90    | 110 GB                     | Paramount+, Spotify, TV360                                                 | Incluidas      |
+| Ilimitado 39.90 | S/39.90    | 125 GB                     | Facebook, Instagram, WhatsApp, Paramount+, Spotify, TV360 *(12 meses)*     | Incluidas      |
+| Ilimitado 46.10 | S/46.10    | 100 GB                     | Facebook, Instagram, Paramount+, Spotify, TV360 *(6 meses)*                | Incluidas      |
+| Ilimitado 49.90 | S/49.90    | 45 GB                      | Facebook, Instagram, WhatsApp, Spotify, TV360 *(duración no especificada)* | Incluidas      |
+| Ilimitado 52.90 | S/52.90    | 160 GB                     | Facebook, Instagram, WhatsApp, Paramount+, Spotify, TV360 *(12 meses)*     | Incluidas      |
+| Ilimitado 79.90 | S/79.90    | 30 GB                      | Facebook, Instagram, WhatsApp, Spotify, TV360 *(duración no especificada)* | Incluidas      |
+
 
 # 📱Web scraping de Planes Movistar Perú
 Este proyecto hace scraping de los planes postpago de Movistar Perú y extrae:
@@ -876,6 +872,8 @@ if __name__ == "__main__":
     else:
         print("No se pudieron extraer los planes. Revisa si la página de Movistar ha cambiado.")
 ```
+Y obtenemos el resumen de la tabla :
+
 | Plan                       | Precio/mes              | Internet  | Apps Ilimitadas    | Llamadas                         | SMS     |
 | -------------------------- | ----------------------- | --------- | ------------------ | -------------------------------- | ------- |
 | Plan Postpago 69.90        | S/69.90                 | Ilimitado | Internet Ilimitado | Ilimitadas Perú                  | 500 SMS |
@@ -1142,6 +1140,7 @@ if __name__ == "__main__":
         # (meaning an error occurred and was printed by the function itself).
         pass # No additional print here to keep output clean if error already printed
 ```
+Y obtenemos el resumen de la tabla :
 | Plan                 | Precio/mes | Internet en Alta Velocidad | Apps Ilimitadas                                   | Llamadas y SMS |
 | -------------------- | ---------- | -------------------------- | ------------------------------------------------- | -------------- |
 | Max 29.90            | S/29.90    | 10 GB                      | Facebook, Instagram, Threads, WhatsApp            | Ilimitadas     |
