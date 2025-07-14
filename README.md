@@ -1164,4 +1164,4 @@ Y obtenemos el resumen de la tabla :
 
 * [ron-62](https://github.com/ron-62) (Alonso Coronado de la Vega)
 * [nalva19](https://github.com/nalva19) (Nicole Alva Aquino)
-* [@usuario3](https://github.com/usuario3) (Alejandra Arroyo)
+* [Alejandra-1805](https://github.com/Alejandra-1805) (Alejandra Arroyo)
